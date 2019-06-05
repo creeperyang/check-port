@@ -1,7 +1,7 @@
 {
     "name": "check-port",
-    "version": "0.0.1",
-    "description": "",
+    "version": "1.0.0-beta",
+    "description": "Check if a port is used and kill the process as you like.",
     "main": "index.js",
     "bin": {
         "check-port": "bin.js"
