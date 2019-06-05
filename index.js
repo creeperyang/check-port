@@ -36,6 +36,13 @@ function parseCliMessage(line) {
     };
 }
 
+/**
+ * Get matched list (pid/localAddress/port) of port
+ * @param {string} port port
+ * @param {boolean} local local address
+ * @param {boolean} exact match port exactly
+ * @returns {Promise<Array>} matched list
+ */
 function getPortUsageInfo(port = '80', local = true, exact = false) {
     return new Promise((resolve, reject) => {
         exec(`netstat -ano | findstr "${port}"`, (err, stdout, stderr) => {
@@ -53,6 +60,11 @@ function getPortUsageInfo(port = '80', local = true, exact = false) {
     });
 }
 
+/**
+ * Get process name with pid
+ * @param {string} pid pid
+ * @returns {Promise<Object>} the process info (pid, name)
+ */
 function getProcessName(pid) {
     return new Promise((resolve, reject) => {
         exec(`tasklist -fi "PID eq ${pid}"`, (err, stdout, stderr) => {
@@ -69,6 +81,11 @@ function getProcessName(pid) {
     });
 }
 
+/**
+ * Kill process correspond to pid
+ * @param {string} pid pid
+ * @returns {Promise} the result
+ */
 function killProcess(pid) {
     return new Promise((resolve, reject) => {
         exec(`taskkill -F -PID "${pid}"`, (err, stdout) => {
