@@ -1,5 +1,5 @@
 {
-    "name": "check-port",
+    "name": "@iux/check-port",
     "version": "1.0.0-beta",
     "description": "Check if a port is used and kill the process as you like.",
     "main": "index.js",

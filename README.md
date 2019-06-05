@@ -7,7 +7,7 @@ A simple cli tool help to check port usage and kill the corresponding process at
 ## Installation
 
 ```bash
-npm i -g check-port
+npm i -g @iux/check-port
 ```
 
 ## Usage
