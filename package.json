@@ -1,0 +1,30 @@
+{
+    "name": "check-port",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "bin": {
+        "check-port": "bin.js"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/creeperyang/check-port.git"
+    },
+    "keywords": [
+        "port",
+        "tcp port"
+    ],
+    "author": "creeperyang <yangcreeper@hotmail.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/creeperyang/check-port/issues"
+    },
+    "homepage": "https://github.com/creeperyang/check-port#readme",
+    "dependencies": {
+        "chalk": "^2.4.2",
+        "commander": "^2.20.0"
+    }
+}
