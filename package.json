@@ -1,6 +1,6 @@
 {
     "name": "@iux/check-port",
-    "version": "1.0.0-beta",
+    "version": "1.0.0",
     "description": "Check if a port is used and kill the process as you like.",
     "main": "index.js",
     "bin": {
@@ -21,7 +21,9 @@
         "npm": "^5.8.0",
         "node": "^10.0.0"
     },
-    "os": ["win32"],
+    "os": [
+        "win32"
+    ],
     "author": "creeperyang <yangcreeper@hotmail.com>",
     "license": "MIT",
     "bugs": {
