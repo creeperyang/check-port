@@ -8,19 +8,23 @@ const pkg = require('./package.json');
 const MSGS = isCNLanguage() ? {
         warnNoPort: '请指定端口',
         warnNoMatch: '指定端口无进程监听',
+        warnInvalidPort: '指定的端口无效',
         missArgs: '缺少参数：',
         result: '端口匹配结果如下：',
         killProcess: '结束以下进程：',
         itemKill: '是否自动杀死对应进程',
         itemFuzzy: '是否模糊匹配端口',
+        itemError: '显示详细错误信息',
     } : {
         warnNoPort: 'specify the port please',
         warnNoMatch: 'No process bound to the specified port(s)',
+        warnInvalidPort: 'The port number is invliad',
         missArgs: 'Miss arguments:',
         result: 'The search result is:',
         killProcess: 'Now will kill the corresponding process(es):',
         itemKill: 'whether to kill process',
         itemFuzzy: 'match the port fuzzily',
+        itemError: 'show error details',
     };
 
 const LOG_PREFIX = '\r\n\t';
@@ -41,25 +45,30 @@ function isCNLanguage() {
 program
     .version(pkg.version)
     .option('-k, --kill', MSGS.itemKill)
-    .option('-f, --fuzzy', MSGS.itemFuzzy);
+    .option('-f, --fuzzy', MSGS.itemFuzzy)
+    .option('--show-errors', MSGS.itemError);
 
 program.parse(process.argv);
 
 const ports = program.args;
 
 if (!ports.length) {
-    console.log(
+    return console.log(
         LOG_PREFIX +
             chalk.grey(MSGS.missArgs) +
             ' ' +
             chalk.bold.bgRed(MSGS.warnNoPort)
     );
-    return;
+} else if (ports.length === 1 && /help/i.test(ports[0])) {
+    return program.help();
+} else if (!/^\d+$/.test(ports.join(''))) {
+    console.log();
+    return console.log(formatErrorMsg(MSGS.warnInvalidPort));
 }
 
-checkPort({ ports: ports, autoKill: program.kill, exact: !program.fuzzy });
+checkPort({ ports: ports, autoKill: program.kill, exact: !program.fuzzy, showErrors: program.showErrors });
 
-function checkPort({ ports, local = true, exact = true, autoKill = false }) {
+function checkPort({ ports, local = true, exact = true, autoKill = false, showErrors }) {
     return Promise.all(ports.map(port => getPortUsageInfo(port, local, exact)))
         .then(lists => {
             return lists.reduce((acc, cur) => acc.concat(cur), []).filter(v => {
@@ -110,24 +119,13 @@ function checkPort({ ports, local = true, exact = true, autoKill = false }) {
         .then(list => {
             const pids = Object.keys(list);
             if (!pids.length) return;
-
-            console.log(LOG_PREFIX + chalk.bgGreen.bold(MSGS.killProcess));
-            pids.forEach(pid => {
-                killProcess(pid).then(() => {
-                    console.log(
-                        LOG_PREFIX2 +
-                            chalk.bold.white(pid.padEnd(10)) +
-                            '\t' +
-                            chalk.bold.green('√')
-                    );
-                });
-            });
+            killProcesses(pids, showErrors);
         })
         .catch(reason => {
             if (reason.toString() === 'no-match') {
                 console.log(LOG_PREFIX + chalk.bold.green(MSGS.warnNoMatch));
             } else {
-                console.log(formatErrorMsg(reason));
+                showErrors && console.log(formatErrorMsg(reason));
             }
         });
 }
@@ -142,4 +140,28 @@ function formatErrorMsg(err) {
         );
     }
     return LOG_PREFIX2 + chalk.bold.red(err.toString());
+}
+
+function killProcesses(pids, showErrors) {
+    console.log(LOG_PREFIX + chalk.bgGreen.bold(MSGS.killProcess));
+    pids.forEach(pid => {
+        killProcess(pid).then(() => {
+            console.log(
+                LOG_PREFIX2 +
+                    chalk.bold.white(pid.padEnd(10)) +
+                    '\t' +
+                    chalk.bold.green('√')
+            );
+        }).catch(e => {
+            console.log(
+                LOG_PREFIX2 +
+                    chalk.bold.white(pid.padEnd(10)) +
+                    '\t' +
+                    chalk.bold.red('×')
+            );
+            if (showErrors) {
+                console.error(formatErrorMsg(e));
+            }
+        });
+    });
 }
