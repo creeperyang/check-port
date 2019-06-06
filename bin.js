@@ -3,6 +3,7 @@
 const program = require('commander');
 const chalk = require('chalk');
 const { getPortUsageInfo, getProcessName, killProcess } = require('./index');
+const pkg = require('./package.json');
 
 const MSGS = isCNLanguage() ? {
         warnNoPort: '请指定端口',
@@ -38,9 +39,9 @@ function isCNLanguage() {
 }
 
 program
-    .version('0.0.1')
-    .option('-k, --kill', 'whether to kill process')
-    .option('-f, --fuzzy', 'match the port fuzzily');
+    .version(pkg.version)
+    .option('-k, --kill', MSGS.itemKill)
+    .option('-f, --fuzzy', MSGS.itemFuzzy);
 
 program.parse(process.argv);
 
@@ -61,7 +62,10 @@ checkPort({ ports: ports, autoKill: program.kill, exact: !program.fuzzy });
 function checkPort({ ports, local = true, exact = true, autoKill = false }) {
     return Promise.all(ports.map(port => getPortUsageInfo(port, local, exact)))
         .then(lists => {
-            return lists.reduce((acc, cur) => acc.concat(cur), []);
+            return lists.reduce((acc, cur) => acc.concat(cur), []).filter(v => {
+                // Filter: 0  TIME_WAIT 127.0.0.1:3023 System
+                return v.pid !== '0';
+            });
         })
         .then(list => {
             if (!list || !list.length) {
